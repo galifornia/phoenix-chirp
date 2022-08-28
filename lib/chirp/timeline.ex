@@ -103,6 +103,12 @@ defmodule Chirp.Timeline do
   """
   def delete_post(%Post{} = post) do
     Repo.delete(post)
+
+    broadcast({:ok, post}, :post_deleted)
+  end
+
+  def done_deleting() do
+     broadcast({:ok, nil}, :post_deleted_completed)
   end
 
   @doc """

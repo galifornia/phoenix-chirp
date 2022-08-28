@@ -13,7 +13,7 @@
   </.modal>
 <% end %>
 
-<div id="posts" phx-update="prepend">
+<div id="posts" phx-update={@deleting && "replace" || "prepend"}>
   <%= for post <- @posts do %>
     <%= live_component ChirpWeb.PostLive.PostComponent, id: post.id, post: post %>
   <% end %>

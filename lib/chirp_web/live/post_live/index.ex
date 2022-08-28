@@ -7,7 +7,9 @@ defmodule ChirpWeb.PostLive.Index do
   @impl true
   def mount(_params, _session, socket) do
     if connected?(socket), do: Timeline.subscribe()
-    {:ok, assign(socket, :posts, list_posts()), temporary_assigns: [posts: []]}
+
+    {:ok, socket |> assign(:posts, list_posts()) |> assign(:deleting, false),
+     temporary_assigns: [posts: []]}
   end
 
   @impl true
@@ -38,7 +40,22 @@ defmodule ChirpWeb.PostLive.Index do
     post = Timeline.get_post!(id)
     {:ok, _} = Timeline.delete_post(post)
 
-    {:noreply, assign(socket, :posts, list_posts())}
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:post_deleted, _post}, socket) do
+    Timeline.done_deleting()
+
+    {:noreply,
+     socket
+     |> assign(:posts, list_posts())
+     |> assign(:deleting, true)}
+  end
+
+  @impl true
+  def handle_info({:post_deleted_completed, _post}, socket) do
+    {:noreply, assign(socket, :deleting, false)}
   end
 
   @impl true
